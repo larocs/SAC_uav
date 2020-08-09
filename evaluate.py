@@ -15,8 +15,24 @@ import pyrep.backend.sim  as sim
 
 
 
-def rollouts(env, policy, action_range, max_timesteps = 1000,env_reset_mode = 'False',  time_horizon=250):
+def rollouts(env, policy, action_range, max_timesteps = 1000,  time_horizon=250):
+    """
+    Perform policy rollouts until a max given number of steps
 
+    Parameters
+    ----------
+    env : 
+        A larocs_sim environment
+    policy : 
+        An actor-policy for the agent act in the environment
+    action_range : list
+        Range of possible float values for the action
+    max_timesteps : int, optional
+        Number of timesteps to perform while interacting with the environment, by default 1000
+    time_horizon : int, optional
+        The number of steps for each episode, by default 250
+
+    """
     count = 0
     dones = False
     set_of_obs,set_of_next_obs,set_of_rewards,set_of_actions,set_of_dones,set_of_infos = [],[],[],[],[],[]
@@ -84,7 +100,14 @@ def rollouts(env, policy, action_range, max_timesteps = 1000,env_reset_mode = 'F
 
 
 def run_policy(args):
-      
+    """
+    Loads a and evaluates a trained policy  
+
+    Parameters
+    ----------
+    args : [dict]
+        Users arguments with the options for the framework
+    """
     # Set environment
     env = DroneEnv(random=args.env_reset_mode, headless=args.headless, seed=args.seed, 
         reward_function_name=args.reward_function,state=args.state)

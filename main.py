@@ -14,39 +14,12 @@ from larocs_sim.envs.drone_env import DroneEnv
 from common import utils
 from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
 
-def creating_structures(buffer_size, state_dim, action_dim, device, hidden_dim):
-
-
-    policy_net = PolicyNetwork(state_dim, action_dim, args.net_size_policy).to(device).type(torch.double)
-
-    eval_policy = copy.deepcopy(policy_net)
-
-
-    # Networks instantiation
-    # replay_buffer_size = args.replay_buffer_size
-    replay_buffer = utils.ReplayBuffer(buffer_size)
-
-
-    if args.use_double:
-        value_net = ValueNetwork(state_dim, hidden_dim).to(device).type(torch.double)
-        target_value_net = ValueNetwork(state_dim, hidden_dim).to(device).type(torch.double)
-        soft_q_net = SoftQNetwork(state_dim, action_dim, hidden_dim).to(device).type(torch.double)
-        policy_net = PolicyNetwork(state_dim, action_dim, args.net_size_policy).to(device).type(torch.double)
-        replay_buffer.buffer = np.asarray(replay_buffer.buffer).astype(np.float64).tolist() 
-    else:
-        value_net = ValueNetwork(state_dim, hidden_dim).to(device)
-        target_value_net = ValueNetwork(state_dim, hidden_dim).to(device)
-        soft_q_net = SoftQNetwork(state_dim, action_dim, hidden_dim).to(device)
-        policy_net = PolicyNetwork(state_dim, action_dim, args.net_size_policy).to(device)
-
-    return replay_buffer, policy_net, eval_policy, value_net, target_value_net, soft_q_net        
-
 def argparser():
    
    
     parser = argparse.ArgumentParser("Benching envs")
     parser.add_argument(
-        '--net_size_policy', help='Size of the neural networks hidden layers', type=int, default=256)
+        '--net_size_policy', help='Size of the neural networks hidden layers', type=int, default=64)
     parser.add_argument(
         '--activation_function', help='activation function for policy', type=str, default='relu', choices = ['relu','tanh'])
        
@@ -115,13 +88,49 @@ def argparser():
         args.activation_function = F.tanh
 
 
+    
+
 class SAC():
-    def __init__(self,env, device, replay_buffer_size, hidden_dim, learning_rate, restore_path, max_episodes, use_double, save_path, min_num_steps_before_training = 0, save_interval = 100,):
+
+    def __init__(self,env, replay_buffer_size, hidden_dim, restore_path, device,max_episodes, save_path,
+          learning_rate = 3e-4, use_double = True,
+          min_num_steps_before_training = 0, save_interval = 100,):
+        
+        """
+        Soft Actor-Critic algorithm
+
+
+        Parameters
+        ----------
+        env : 
+            The environment to be used
+        replay_buffer_size : [int]
+            Replay-buffer size
+        hidden_dim : [int]
+            Size of the hidden-layers in Q and V functions[description]
+        restore_path : [str]
+            File path to restore training
+        device : [str or torch.device]
+            'cpu' or 'gpu
+        max_episodes : [int]
+            Max number of episodes to train the policy
+        save_path : [str]
+            File path to save the networks
+        learning_rate : [float], optional
+            The learning rate for gradient based optimization, by default 3e-4
+        use_double : bool, optional
+            Use Float Tensor or Double Tensor, by default True
+        min_num_steps_before_training : int, optional
+            Number of steps to randomly sample before start acting, by default 0
+        save_interval : int, optional
+            The interval in epochs to save the models, by default 100
+        """
+        self.env = env  
+
         self.save_path = save_path
         self.save_interval = save_interval
         self.min_num_steps_before_training = min_num_steps_before_training
         self.restore_path = restore_path
-        self.env = env  
         self.device = device
         self.hidden_dim = hidden_dim
         self.use_double = use_double
@@ -134,8 +143,7 @@ class SAC():
         # hidden_dim = args.net_size_value
         self.action_range = [self.env.agent.action_space.low.min(), self.env.agent.action_space.high.max()]
     
-        self.replay_buffer, self.policy_net, self.eval_policy, self.value_net, self.target_value_net, self.soft_q_net \
-                = creating_structures(replay_buffer_size ,self.state_dim, self.action_dim, self.device, self.hidden_dim)
+        self._creating_models(replay_buffer_size ,self.state_dim, self.action_dim, self.device, self.hidden_dim)
 
 
         # Copying the data to the target networks
@@ -168,7 +176,24 @@ class SAC():
             z_lambda=0.0,
             soft_tau=1e-2,
             ):
+        """
+        SAC train update (Soft-Q)
 
+        Parameters
+        ----------
+        batch_size : [int]
+            Batch size
+        gamma : float, optional
+            Discount factor, by default 0.99
+        mean_lambda : [float], optional
+            coefficient for penalty on policy mean magnitude, by default 1e-3
+        std_lambda : [float], optional
+            coefficient for penalty on policy variance, by default 1e-3
+        z_lambda : float, optional
+            coefficient for penalty on policy mean before been squashed by tanh, by default 0
+        soft_tau : [float], optional
+            Soft coefficient to update target networks, by default 1e-2
+        """
         # Sampling memmory batch
         state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
         if self.use_double:
@@ -233,9 +258,12 @@ class SAC():
         
         return(q_value_loss.item(), policy_loss.item(), value_loss.item())
 
+
     def __write_csv(self, episode,time_elapsed , frame_count, len_replay_buffer, episode_reward, \
                 value_loss, q_value_loss, policy_loss, step):
-
+        """
+        Writes data in csv
+        """
 
         with open(os.path.join(self.save_path, 'progress.csv'), 'a') as csvfile:
             rew_writer = csv.writer(csvfile, delimiter=';',
@@ -246,6 +274,16 @@ class SAC():
 
 
     def __save_model(self, episode ,frame_count):
+        """
+        Saves model pickles
+
+        Parameters
+        ----------
+        episode : [int]
+            Current episode
+        frame_count : [int]
+            Current timestep
+        """
         save_state = {
                 'episode': episode,
                 'frame_count': frame_count,
@@ -262,8 +300,31 @@ class SAC():
         torch.save(save_state['policy_net'], self.save_path+'/state.pt'[:-3]+'_policy.pt')
         print('saving model at = ', self.save_path)
 
-    def train(self):
+    
+    def _creating_models(self, buffer_size, state_dim, action_dim, device, hidden_dim):
+        """
+        Istantiating the networks and buffer
+        """
 
+
+        self.policy_net = PolicyNetwork(state_dim, action_dim, args.net_size_policy).to(device).type(torch.double)
+        self.eval_policy = copy.deepcopy(self.policy_net)
+        self.replay_buffer = utils.ReplayBuffer(buffer_size)
+        self.value_net = ValueNetwork(state_dim, hidden_dim).to(device).type(torch.double)
+        self.target_value_net = ValueNetwork(state_dim, hidden_dim).to(device).type(torch.double)
+        self.soft_q_net = SoftQNetwork(state_dim, action_dim, hidden_dim).to(device).type(torch.double)
+
+        if self.use_double:
+            self.policy_net = self.policy_net.type(torch.double)
+            self.target_value_net = self.target_value_net.type(torch.double)
+            self.value_net = self.value_net.type(torch.double)
+            self.replay_buffer.buffer = np.asarray(self.replay_buffer.buffer).astype(np.float64).tolist() 
+            self.soft_q_net = self.soft_q_net.type(torch.double)
+
+    def train(self):
+        """
+        Trains a continuous policy by means of SAC
+        """
         ## Starting data
         episode = 0
         frame_count = 0
@@ -378,8 +439,10 @@ def main(args):
     action_range = [env.agent.action_space.low.min(), env.agent.action_space.high.max()]
  
    
-    sac = SAC(env,device, args.replay_buffer_size, hidden_dim, args.learning_rate, restore_path, \
-        max_episodes=10, use_double=args.use_double, save_path = save_path, save_interval=args.save_interval)
+    sac = SAC(env = env, replay_buffer_size = args.replay_buffer_size,hidden_dim = hidden_dim, restore_path = restore_path,
+     device = device,  save_path = save_path, learning_rate = args.learning_rate, \
+        max_episodes = args.max_episodes, use_double = args.use_double, save_interval = args.save_interval)
+
 
     
 

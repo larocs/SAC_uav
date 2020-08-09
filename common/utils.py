@@ -5,55 +5,74 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
+
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
 class ReplayBuffer:
+    """
+    A experience buffer used to store and replay data
+
+    Parameters
+    ----------
+        capacity : [int]
+            The max size of the buffer
+    """
     def __init__(self, capacity):
         self.capacity = capacity
         self.buffer = []
         self.position = 0
     
     def push(self, state, action, reward, next_state, done):
+        """
+        Add data to the buffer
+        """
         if len(self.buffer) < self.capacity:
             self.buffer.append(None)
         self.buffer[self.position] = (state, action, reward, next_state, done)
         self.position = (self.position + 1) % self.capacity
     
     def sample(self, batch_size):
+        """
+        Sample a random batch of memmory data from the buffer
+        ----------
+        batch_size : [int]
+            The size of the batch
+
+        Returns
+        -------
+        [list]
+            A batch of rollout experience
+        """
         batch = random.sample(self.buffer, batch_size)
         state, action, reward, next_state, done = map(np.stack, zip(*batch))
         return state, action, reward, next_state, done
     
     def __len__(self):
+        """
+        Size of the buffer
+        """
         return len(self.buffer)
 
-class NormalizedActions(gym.ActionWrapper):
-    def _action(self, action):
-        low  = self.action_space.low
-        high = self.action_space.high
-        
-        action = low + (action + 1.0) * 0.5 * (high - low)
-        action = np.clip(action, low, high)
-        
-        return action
-
-    def _reverse_action(self, action):
-        low  = self.action_space.low
-        high = self.action_space.high
-        
-        action = 2 * (action - low) / (high - low) - 1
-        action = np.clip(action, low, high)
-        
-        return action
-
 def check_dir(file_name):
+    """
+    Checking if directory path exists
+    """
     directory = os.path.dirname(file_name)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 def restore_data(restore_path):
+    """
+    Restore data to re-load training
+
+    Parameters
+    ----------
+    restore_path : [str]
+        File path of the saved data
+    """
     try:
         checkpoint = torch.load(restore_path+'/state.pt')
         # checkpoint = torch.load(restore_path)
@@ -76,8 +95,10 @@ def restore_data(restore_path):
 
 
 
-
 def terminate():
+    """
+    Helper function to proper close the process and the Coppelia Simulator
+    """
     try:
         env.shutdown();import sys; sys.exit(0)
     except:
