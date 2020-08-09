@@ -99,12 +99,11 @@ def run_policy(args):
     print('Finished Loading')
 
     # Neural network parameters
-    action_dim = env.action_space.shape[0]
     try:
         state_dim = env.observation_space.shape[0]
     except:
-        state_dim = env.observation_space
-    # hidden_dim = 256
+    state_dim = env.observation_space
+    action_dim = env.action_space.shape[0]
     hidden_dim = checkpoint['linear1.weight'].data.shape[0]
     action_range = [env.agent.action_space.low.min(), env.agent.action_space.high.max()]
     size_obs = checkpoint['linear1.weight'].data.shape[1]
@@ -126,10 +125,7 @@ def run_policy(args):
     
 
     print('Closing env')
-    try:
-        env.shutdown()
-    except:
-        pass
+    env.shutdown()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

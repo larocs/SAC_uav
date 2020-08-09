@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
@@ -51,3 +52,35 @@ def check_dir(file_name):
     directory = os.path.dirname(file_name)
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+def restore_data(restore_path):
+    try:
+        checkpoint = torch.load(restore_path+'/state.pt')
+        # checkpoint = torch.load(restore_path)
+
+        # Episode and frames
+        episode = checkpoint['episode']
+        frame_count = checkpoint['frame_count']
+        # Models
+        value_net.load_state_dict(checkpoint['value_net'])
+        target_value_net.load_state_dict(checkpoint['target_value_net'])
+        soft_q_net.load_state_dict(checkpoint['soft_q_net'])
+        policy_net.load_state_dict(checkpoint['policy_net'])
+        # Optimizers
+        value_optimizer.load_state_dict(checkpoint['value_optimizer'])
+        soft_q_optimizer.load_state_dict(checkpoint['soft_q_optimizer'])
+        policy_optimizer.load_state_dict(checkpoint['policy_optimizer'])
+        replay_buffer = checkpoint['replay_buffer']
+    except:
+        print('Não foi possível carregar um modelo pré-existente')
+
+
+
+
+def terminate():
+    try:
+        env.shutdown();import sys; sys.exit(0)
+    except:
+        import sys; sys.exit(0)
+
+
