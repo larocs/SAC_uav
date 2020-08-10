@@ -9,7 +9,7 @@ from torch import nn
 from torch import optim
 import torch
 
-from sim_framework.envs.drone_env import DroneEnv
+from larocs_sim.envs.drone_env import DroneEnv
 
 from common import utils
 from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
@@ -389,6 +389,8 @@ class SAC():
             if len(self.replay_buffer) > batch_size:
                 self.__write_csv(episode,time_elapsed , frame_count, len(self.replay_buffer), episode_reward, \
                     value_loss, q_value_loss, policy_loss, step)
+
+
 
 def main(args):
     

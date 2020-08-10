@@ -6,8 +6,11 @@ from collections import OrderedDict
 import torch
 import pandas as pd
 
-from larocs_sim.envs.drone_env import DroneEnv
-from networks.structures import *
+# from larocs_sim.envs.drone_env import DroneEnv
+from sim_framework.envs.drone_env import DroneEnv
+
+from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
+
 import pyrep.backend.sim  as sim
 
 
@@ -15,7 +18,7 @@ import pyrep.backend.sim  as sim
 
 
 
-def rollouts(env, policy, action_range, max_timesteps = 1000,  time_horizon=250):
+def rollouts(env, policy, action_range, device,  max_timesteps = 1000,  time_horizon=250):
     """
     Perform policy rollouts until a max given number of steps
 
@@ -64,9 +67,9 @@ def rollouts(env, policy, action_range, max_timesteps = 1000,  time_horizon=250)
                 'infos' : set_of_infos}
                 return set_tau
             try:
-                actions, agent_info = policy.deterministic_action(obs0)
+                actions, agent_info = policy.deterministic_action(state_to_tensor(obs0, device))
             except:
-                actions= policy.deterministic_action(obs0)
+                actions= policy.deterministic_action(state_to_tensor(obs0, device))
 
 
             # Take actions in env and look the results
@@ -99,6 +102,7 @@ def rollouts(env, policy, action_range, max_timesteps = 1000,  time_horizon=250)
         set_of_infos.append(mb_infos)
 
 
+
 def run_policy(args):
     """
     Loads a and evaluates a trained policy  
@@ -108,6 +112,13 @@ def run_policy(args):
     args : [dict]
         Users arguments with the options for the framework
     """
+
+    use_cuda = torch.cuda.is_available()
+    if use_cuda and (args.use_cuda == True):
+        device=torch.device("cuda")
+    else:
+        device=torch.device("cpu")
+
     # Set environment
     env = DroneEnv(random=args.env_reset_mode, headless=args.headless, seed=args.seed, 
         reward_function_name=args.reward_function,state=args.state)
@@ -125,7 +136,7 @@ def run_policy(args):
     try:
         state_dim = env.observation_space.shape[0]
     except:
-    state_dim = env.observation_space
+        state_dim = env.observation_space
     action_dim = env.action_space.shape[0]
     hidden_dim = checkpoint['linear1.weight'].data.shape[0]
     action_range = [env.agent.action_space.low.min(), env.agent.action_space.high.max()]
@@ -137,6 +148,7 @@ def run_policy(args):
    # Networks instantiation
     policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim).to(device)
 
+    print(policy_net)
 
     # Loading  Models
     policy_net.load_state_dict(checkpoint)
@@ -144,11 +156,19 @@ def run_policy(args):
 
     print("Running the policy...")
     set_tau = rollouts(env, policy_net,\
-            action_range, max_timesteps = args.max_timesteps,env_reset_mode = 'False',  time_horizon=args.H)
+            action_range, device, max_timesteps = args.max_timesteps,  time_horizon=args.H)
     
 
     print('Closing env')
     env.shutdown()
+
+
+def state_to_tensor(state, device):
+    if args.use_double:
+        return torch.DoubleTensor(state).unsqueeze(0).to(device)
+    else:
+        return torch.FloatTensor(state).unsqueeze(0).to(device)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -169,7 +189,9 @@ if __name__ == "__main__":
         '--reward_function', help='What reward function to use', default='Normal',type=str)
     parser.add_argument(
         '--state', help='State to be used', default='Old',type=str)
-    
+    parser.add_argument(
+        '--use_double', help='Flag to use float64',  type=str, default=None)
+        
     
     args = parser.parse_args()
 

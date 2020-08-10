@@ -34,7 +34,7 @@ experiment_name=teste
 SAVED_POLICY=saved_policies/sac_optimal_policy.pt
 SAVE_INTERVAL=10
 
-python main.py --save_path=${experiment_name} --replay_buffer_size=${buffer_size} --restore_path=${SAVED_POLICY} \
+python main2.py --save_path=${experiment_name} --replay_buffer_size=${buffer_size} --restore_path=${SAVED_POLICY} \
 --log_interval=${log_interval} --env_reset_mode=${env_reset_mode} --batch-size=${BATCH_SIZE}     \
 --net_size_value=${net_size_value} --net_size_policy=${net_size_policy} --num_steps_until_train=${num_steps_until_train} --num_trains_per_step=${num_trains_per_step} --min_num_steps_before_training=${min_num_steps_before_training} \
 --use_cuda=${CUDA} --seed=${SEED} --eval_interval=100 --reward_function=${REWARD_FUNCTION} --max_episodes=${max_episodes} \
