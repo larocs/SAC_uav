@@ -9,11 +9,13 @@ from torch import nn
 from torch import optim
 import torch
 
+# from larocs_sim.envs.drone_env import DroneEnv
 from sim_framework.envs.drone_env import DroneEnv
 
 from common import utils
 from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
 
+import pickle
 def argparser():
    
    
@@ -88,7 +90,17 @@ def argparser():
         args.activation_function = F.tanh
 
 
-    
+
+
+def terminate():
+    print('terminating  ')
+    try:
+        env.shutdown();import sys; sys.exit(0)
+    except:
+        import sys; sys.exit(0)
+
+
+
 
 class SAC():
 
@@ -196,6 +208,8 @@ class SAC():
         """
         # Sampling memmory batch
         state, action, reward, next_state, done = self.replay_buffer.sample(batch_size)
+
+        # Broadcast
         if self.use_double:
             state      = torch.DoubleTensor(state).to(self.device)
             next_state = torch.DoubleTensor(next_state).to(self.device)
@@ -209,6 +223,9 @@ class SAC():
             action     = torch.FloatTensor(action).to(self.device)
             reward     = torch.FloatTensor(reward).unsqueeze(1).to(self.device)
             done       = torch.FloatTensor(np.float32(done)).unsqueeze(1).to(self.device)
+
+
+        
 
 
         ## Net forward-passes
@@ -233,6 +250,7 @@ class SAC():
         std_loss  = std_lambda  * log_std.pow(2).mean()
         z_loss    = z_lambda    * z.pow(2).sum(1).mean()
         policy_loss += mean_loss + std_loss + z_loss
+
 
         ## NN updates
         self.soft_q_optimizer.zero_grad()
@@ -371,7 +389,7 @@ class SAC():
                 if done:
                     break
             
-            print("Episode = {0} | Reward = {1:.2f}".format(episode, episode_reward))
+            print("Episode = {0} | Reward = {1:.2f} | Lenght = {2:.2f}".format(episode, episode_reward, step))
             episode += 1
             
             ## Saving 
@@ -389,6 +407,9 @@ class SAC():
             if len(self.replay_buffer) > batch_size:
                 self.__write_csv(episode,time_elapsed , frame_count, len(self.replay_buffer), episode_reward, \
                     value_loss, q_value_loss, policy_loss, step)
+
+# import cProfile
+
 
 def main(args):
     
@@ -458,3 +479,4 @@ if __name__ == "__main__":
     np.random.seed(seed=args.seed)
 
     main(args)
+    # cProfile.run('main(args)', sort='time', filename=("./teste.cprof"))

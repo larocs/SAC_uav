@@ -2,7 +2,7 @@ import torch
 import gym
 import random
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import os
 
 from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
@@ -50,6 +50,28 @@ class ReplayBuffer:
         state, action, reward, next_state, done = map(np.stack, zip(*batch))
         return state, action, reward, next_state, done
     
+    # def sample(self, batch_size):
+    #     """
+    #     Sample a random batch of memmory data from the buffer
+    #     ----------
+    #     batch_size : [int]
+    #         The size of the batch
+
+    #     Returns
+    #     -------
+    #     [list]
+    #         A batch of rollout experience
+    #     """
+    
+    #     batch = random.sample(self.buffer, batch_size)
+    #     state = np.array([elem[0] for elem in batch],dtype = np.double)
+    #     action = np.array([elem[1] for elem in batch],dtype = np.double)
+    #     reward = np.array([elem[2] for elem in batch],dtype = np.double)
+    #     next_state = np.array([elem[3] for elem in batch],dtype = np.double)
+    #     done = np.array([elem[4] for elem in batch], dtype=np.double)
+
+    #     return state, action, reward, next_state, done
+
     def __len__(self):
         """
         Size of the buffer

@@ -4,7 +4,7 @@ REWARD_FUNCTION=Reward_24
 env_reset_mode=Discretized_Uniform
 STATE=New_action
 
-python evaluate.py --headless=False --reward_function=${REWARD_FUNCTION} --state=${STATE} --file=${SAVED_POLICY} \
+python3 evaluate.py --headless=False --reward_function=${REWARD_FUNCTION} --state=${STATE} --file=${SAVED_POLICY} \
 --env_reset_mode=${env_reset_mode}
 
 

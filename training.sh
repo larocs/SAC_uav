@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# REWARD_FUNCTION=Normal
-REWARD_FUNCTION=Reward_24
+REWARD_FUNCTION=Normal
+# REWARD_FUNCTION=Reward_24
 
 SEED=42
 CUDA=True
@@ -15,6 +15,10 @@ STATE=New_action
 log_interval=10
 
 BATCH_SIZE=4000
+# BATCH_SIZE=200
+
+# BATCH_SIZE=256
+
 buffer_size=1000000
 
 net_size_value=64
@@ -24,6 +28,9 @@ num_trains_per_step=1
 min_num_steps_before_training=0
 learning_rate=0.0001
 max_episodes=100000
+max_episodes=300
+
+
 ACT_FUNCTION=tanh
 
 eval_interval=100
@@ -32,9 +39,9 @@ experiment_name=teste
 
 ## SAVING MODEL
 SAVED_POLICY=saved_policies/sac_optimal_policy.pt
-SAVE_INTERVAL=10
+SAVE_INTERVAL=200
 
-python main2.py --save_path=${experiment_name} --replay_buffer_size=${buffer_size} --restore_path=${SAVED_POLICY} \
+python3 main.py --save_path=${experiment_name} --replay_buffer_size=${buffer_size} --restore_path=${SAVED_POLICY} \
 --log_interval=${log_interval} --env_reset_mode=${env_reset_mode} --batch-size=${BATCH_SIZE}     \
 --net_size_value=${net_size_value} --net_size_policy=${net_size_policy} --num_steps_until_train=${num_steps_until_train} --num_trains_per_step=${num_trains_per_step} --min_num_steps_before_training=${min_num_steps_before_training} \
 --use_cuda=${CUDA} --seed=${SEED} --eval_interval=100 --reward_function=${REWARD_FUNCTION} --max_episodes=${max_episodes} \
