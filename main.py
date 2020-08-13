@@ -9,13 +9,12 @@ from torch import nn
 from torch import optim
 import torch
 
-# from larocs_sim.envs.drone_env import DroneEnv
 from sim_framework.envs.drone_env import DroneEnv
 
 from common import utils
 from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
 
-import pickle
+
 def argparser():
    
    
@@ -92,12 +91,6 @@ def argparser():
 
 
 
-def terminate():
-    print('terminating  ')
-    try:
-        env.shutdown();import sys; sys.exit(0)
-    except:
-        import sys; sys.exit(0)
 
 
 
@@ -408,7 +401,6 @@ class SAC():
                 self.__write_csv(episode,time_elapsed , frame_count, len(self.replay_buffer), episode_reward, \
                     value_loss, q_value_loss, policy_loss, step)
 
-# import cProfile
 
 
 def main(args):
@@ -429,8 +421,17 @@ def main(args):
     save_path = os.path.join('./checkpoint/', args.save_path) +'/'
 
 
-    restore_path = args.restore_path
+    restore_path = args.restore_path or save_path
+    print(restore_path)
+    return
     report_folder = save_path #save_path.split('/')[0] + '/'
+
+    # Check if they exist
+    utils.check_dir(save_path)
+    if restore_path:
+        utils.check_dir(restore_path)
+    utils.check_dir(report_folder)
+
 
     ## Preparing log csv
     if not os.path.isfile(os.path.join(report_folder,'progress.csv')):
@@ -443,12 +444,6 @@ def main(args):
                                                     "value_loss", "q_value_loss", "policy_loss", \
                                                     "episode_lenght"])
                                                   
-    # Check if they exist
-    utils.check_dir(save_path)
-    if restore_path:
-        utils.check_dir(restore_path)
-    utils.check_dir(report_folder)
-
 
         # Network and env parameters
     action_dim = env.action_space.shape[0]
@@ -479,4 +474,3 @@ if __name__ == "__main__":
     np.random.seed(seed=args.seed)
 
     main(args)
-    # cProfile.run('main(args)', sort='time', filename=("./teste.cprof"))

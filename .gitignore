@@ -1,3 +1,7 @@
+## jupyter checkpoints
+.ipynb_checkpoints
+
+## saved models
 checkpoint/
 
 

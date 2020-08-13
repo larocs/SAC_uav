@@ -6,15 +6,11 @@ from collections import OrderedDict
 import torch
 import pandas as pd
 
-# from larocs_sim.envs.drone_env import DroneEnv
 from sim_framework.envs.drone_env import DroneEnv
 
 from networks.structures import PolicyNetwork, ValueNetwork, SoftQNetwork
 
 import pyrep.backend.sim  as sim
-
-
-
 
 
 
@@ -148,7 +144,6 @@ def run_policy(args):
    # Networks instantiation
     policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim).to(device)
 
-    print(policy_net)
 
     # Loading  Models
     policy_net.load_state_dict(checkpoint)
@@ -164,6 +159,7 @@ def run_policy(args):
 
 
 def state_to_tensor(state, device):
+    """Transform numpy array to torch tensor"""
     if args.use_double:
         return torch.DoubleTensor(state).unsqueeze(0).to(device)
     else:
@@ -171,6 +167,7 @@ def state_to_tensor(state, device):
 
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--file', type=str,
                         help='path to the snapshot file')
