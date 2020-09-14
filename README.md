@@ -28,7 +28,7 @@ It is a traditional RL env that access the Pyrep plugin, which access Coppelia S
   <img src="assets/tikz_setup.png" />
 </p>
 
-**Initial positions for the UAV agent**
+	**Initial positions for the UAV agent**
 
 <!-- ![Initial Position distribution](assets/initial_positions.png)  -->
 
@@ -42,7 +42,7 @@ It is a traditional RL env that access the Pyrep plugin, which access Coppelia S
 
 ### Docker
 
-One of the safest way to emulate our envinronment is using a Docker container. Change the variables in the container and then run:
+One of the safest way to emulate our envinronment is using a Docker container. Change the variables in the container and then use the Makefile to make it easier to use our Docker Container:
 
 **create-image**
 
@@ -69,9 +69,9 @@ make evaluate
 
 ### Without-Docker
 
-1) Install Coppelia
-2) Install Pyrep
-3) Install Drone_RL
+1) Install Coppelia [Coppelia Simulator](https://www.coppeliarobotics.com/)
+2) Install Pyrep [Pyrep](https://github.com/stepjam/PyRep)
+3) Install Drone_RL [Drone_RL](https://github.com/larocs/Drone_RL)
 4)To install requirements:
 
 ```setup
@@ -119,8 +119,9 @@ You can check the saved trained policies in:
 
 ## Results
 
-Run the notebooks on [notebooks/](notebooks/) to check the trajectories presented on the paper. 
+Run the notebooks on [notebooks/](notebooks/) to check the images presented on the paper. 
 
+[results](notebooks/README.md)
 
 ## Credits
 
