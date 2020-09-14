@@ -1,6 +1,6 @@
 FROM nvidia/cuda:10.1-base-ubuntu18.04
 
-LABEL mantainer="gvgramazio@gmail.com" \
+LABEL mantainer="gabrielmoraesbarros@gmail.com" \
       version="0.1"
 
 RUN apt-get update && apt-get install -y \

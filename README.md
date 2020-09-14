@@ -2,17 +2,90 @@
 
 This repository is the official implementation of [Using Soft Actor-Critic for Low-Level UAV Control](). 
 
->📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials
+<!-- >📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials -->
 
-## Requirements
+We train a policy using Soft Actor-Critic to control an UAV. This agent is dropped in the air, with a sampled distance and inclination from the target (the green sphere in the [0,0,0] position), and has to get as close as possible to the target. In our experiments the target always has the position = [0,0,0] and angular velocity = [0,0,0].
 
-To install requirements:
+**Watch the video**
+
+
+
+<!-- [![Watch the video](https://img.youtube.com/vi/9z8vGs0Ri5g/hqdefault.jpg)](https://www.youtube.com/watch?v=9z8vGs0Ri5g) -->
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=9z8vGs0Ri5g" title="Watch the Video">
+    <img src="https://img.youtube.com/vi/9z8vGs0Ri5g/hqdefault.jpg" alt="homepage" />
+  </a>
+</p>
+
+
+**Framework**
+It is a traditional RL env that access the Pyrep plugin, which access Coppelia Simulator API. It is a lot faster than using the Remote API of Coppelia Simulator and you also have access to a simpler API for manipulating/creating objects inside your running simulation.
+
+<!-- ![Framework](assets/tikz_setup.png) -->
+
+<p align="center">
+  <img src="assets/tikz_setup.png" />
+</p>
+
+**Initial positions for the UAV agent**
+
+<!-- ![Initial Position distribution](assets/initial_positions.png)  -->
+
+<p align="center">
+  <img src="assets/initial_positions.png" />
+</p>
+
+
+
+## Requirements/Installing
+
+### Docker
+
+One of the safest way to emulate our envinronment is using a Docker container. Change the variables in the container and then run:
+
+**create-image**
+
+```creating-image
+make create-image
+```
+
+**create-container**
+
+```creating-container
+make create-container
+```
+**training**
+
+```training-an-agent
+make training
+```
+
+**evaluate**
+
+```evaluate
+make evaluate
+```
+
+### Without-Docker
+
+1) Install Coppelia
+2) Install Pyrep
+3) Install Drone_RL
+4)To install requirements:
 
 ```setup
 pip install -r requirements.txt
 ```
 
->📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
+4) To install this repo:
+```setup
+python setup.py install
+```
+
+
+<!-- 
+>📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc... -->
 
 ## Training
 
@@ -42,25 +115,20 @@ You can check the saved trained policies in:
 
 <!-- >📋  Give a link to where/how the pretrained models can be downloaded and how they were trained (if applicable).  Alternatively you can have an additional column in your results table with a link to the models. -->
 
+
+
+## Results
+
+Run the notebooks on [notebooks/](notebooks/) to check the trajectories presented on the paper. 
+
+
 ## Credits
 
 Code heavily based in [RL-Adventure-2](https://github.com/higgsfield/RL-Adventure-2)
 
 Environment is a continuation of the work in:
 
-@article{CANOLARS,
-author = {Lopes, Guilherme and Ferreira, Murillo and Simões, Alexandre and Colombini, Esther},
-title = {Intelligent Control of a Quadrotor with Proximal Policy Optimization Reinforcement Learning},
-year = {2018},
-month = {11},
-journal = {Latin American Robotic Symposium},
-pages = {503-508},
-doi = {10.1109/LARS/SBR/WRE.2018.00094}
-}
-
-## Results
-
-Run the notebooks on [notebooks/](notebooks/) to check the trajectories presented on the paper. 
+    G.  Lopes,  M.  Ferreira,  A.  Sim ̃oes,  and  E.  Colombini,  “Intelligentcontrol of a quadrotor with proximal policy optimization reinforcementlearning,”Latin American Robotic Symposium, pp. 503–508, 11 2018
 
 <!-- ### [Image Classification on ImageNet](https://paperswithcode.com/sota/image-classification-on-imagenet)
 
