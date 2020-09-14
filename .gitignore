@@ -1,3 +1,9 @@
+## Pip3 in the container is installing this src directory TODO: fix it
+src/
+
+## Random code
+idea/
+idea
 ## jupyter checkpoints
 .ipynb_checkpoints
 
@@ -18,7 +24,6 @@ __pycache__/
 __pycache__/
 *.py[cod]
 *.pyc
-
 __pycache__/
 # C extensions
 *.so

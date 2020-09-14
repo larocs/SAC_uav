@@ -45,16 +45,16 @@ def rollouts(
 
     while True:
         mb_obs, mb_next_obs, mb_rewards, mb_actions, mb_dones, mb_infos = [], [], [], [], [], []
-        sim.simRemoveBanner(sim.sim_handle_all)
+        # sim.simRemoveBanner(sim.sim_handle_all)
         rollout += 1
 
         obs0 = env.reset()
 
-        sim.simAddBanner(label="Rollout = {0}".format(rollout).encode('ascii'),
-                         size=0.2,
-                         options=1,
-                         positionAndEulerAngles=[0, 0, 2.5, 1.3, 0, 0],
-                         parentObjectHandle=-1)
+        # sim.simAddBanner(label = "Rollout = {0}".format(rollout).encode('ascii'),\
+        #      size = 0.2,\
+        #      options =  1,
+        #      positionAndEulerAngles=[0,0,2.5,1.3,0,0],
+        #      parentObjectHandle = -1)
 
         for j in range(time_horizon):
             dones = False

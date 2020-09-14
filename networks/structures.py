@@ -1,15 +1,16 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F 
+import torch.nn.functional as F
 from torch.distributions import Normal, Beta
 
 # from common.utils import *
 
+
 class ValueNetwork(nn.Module):
     """
     A Value V(s) network
-    
+
     Parameters
         ----------
         state_dim : [int]
@@ -19,10 +20,9 @@ class ValueNetwork(nn.Module):
         init_w : [float], optional
             Initial weights for the neural network, by default 3e-3
     """
-    
+
     def __init__(self, state_dim, hidden_dim, init_w=3e-3):
         super(ValueNetwork, self).__init__()
-
 
         self.linear1 = nn.Linear(state_dim, hidden_dim)
         self.linear2 = nn.Linear(hidden_dim, hidden_dim)
@@ -42,7 +42,7 @@ class ValueNetwork(nn.Module):
 
         Returns
         -------
-        
+
             The value_hat from being in each state
         """
         x = F.relu(self.linear1(state))
@@ -101,7 +101,7 @@ class SoftQNetwork(nn.Module):
 class PolicyNetwork(nn.Module):
     """
     The policy network for implementing SAC
-    
+
     Parameters
         ----------
         state_dim : [int]
@@ -120,9 +120,17 @@ class PolicyNetwork(nn.Module):
             Name of the activation function
 
     """
-    def __init__(self, state_dim, num_actions, hidden_size, init_w=3e-3, log_std_min=-20, log_std_max=2,
-                                                     activation_function = F.relu):
-        
+
+    def __init__(
+            self,
+            state_dim,
+            num_actions,
+            hidden_size,
+            init_w=3e-3,
+            log_std_min=-20,
+            log_std_max=2,
+            activation_function=F.relu):
+
         super(PolicyNetwork, self).__init__()
 
         self.log_std_min = log_std_min
@@ -141,8 +149,6 @@ class PolicyNetwork(nn.Module):
 
         self.activation_function = activation_function
 
-
-
     def forward(self, state,):
         """
         Policy forward-pass
@@ -151,7 +157,7 @@ class PolicyNetwork(nn.Module):
         ----------
         state : [torch.Tensor]
             The input state
-        
+
         Returns
             [torch.Tensor] - action to be taken
         -------
@@ -160,7 +166,7 @@ class PolicyNetwork(nn.Module):
 
         x = self.activation_function(self.linear2(x))
 
-        mean    = self.mean_linear(x)
+        mean = self.mean_linear(x)
         log_std = self.log_std_linear(x)
         log_std = torch.clamp(log_std, self.log_std_min, self.log_std_max)
 
@@ -174,7 +180,7 @@ class PolicyNetwork(nn.Module):
         ----------
         state : [torch.Tensor]
             The input state
-     
+
         Returns
         -------
             squashed_action, log_prob, raw_action, policy_mean, policy_log_std
@@ -183,17 +189,17 @@ class PolicyNetwork(nn.Module):
         std = log_std.exp()
 
         normal = Normal(mean, std)
-        z = normal.sample() ## Add reparam trick?
+        z = normal.sample()  # Add reparam trick?
         action = torch.tanh(z)
 
-        log_prob = normal.log_prob(z) - torch.log(1 - action.pow(2) + epsilon) ##  -  np.log(self.action_range) See gist https://github.com/quantumiracle/SOTA-RL-Algorithms/blob/master/sac_v2.py
-        # log_prob = normal.log_prob(z) - torch.log(torch.clamp(1 - action.pow(2), min=0,max=1) + epsilon) # nao precisa por causa do squase tanh
-
+        # -  np.log(self.action_range) See gist https://github.com/quantumiracle/SOTA-RL-Algorithms/blob/master/sac_v2.py
+        log_prob = normal.log_prob(z) - torch.log(1 - action.pow(2) + epsilon)
+        # log_prob = normal.log_prob(z) - torch.log(torch.clamp(1 - action.pow(2),
+        # min=0,max=1) + epsilon) # nao precisa por causa do squase tanh
 
         log_prob = log_prob.sum(-1, keepdim=True)
 
         return action, log_prob, z, mean, log_std
-
 
     def get_action(self, state):
         """
@@ -213,13 +219,12 @@ class PolicyNetwork(nn.Module):
         std = log_std.exp()
 
         normal = Normal(mean, std)
-        z      = normal.sample()
-        
+        z = normal.sample()
+
         action = torch.tanh(z)
 
-        action  = action.detach().cpu().numpy()
+        action = action.detach().cpu().numpy()
         return action[0]
-
 
     def deterministic_action(self, state):
         """
@@ -233,10 +238,10 @@ class PolicyNetwork(nn.Module):
         Returns
         -------
         squashed_action:
-            Action after tanh        
+            Action after tanh
         """
         mean, log_std = self.forward(state)
         action = torch.tanh(mean)
 
-        action  = action.detach().cpu().numpy()
+        action = action.detach().cpu().numpy()
         return action[0]

@@ -1,14 +1,13 @@
 #!/bin/bash
 
 ## Reward functions
-REWARD_FUNCTION=Normal
-# REWARD_FUNCTION=Reward_24
+REWARD_FUNCTION=Reward_24
 # Random seed
 SEED=42
 # Cuda or cpu
 CUDA=True
 # Prefix for experiment name
-PREFIX=Prefix
+PREFIX=Experiment_1
 ## Initial position probability distribution (\rho_{o})
 env_reset_mode=Discretized_Uniform
 ## State-Space
@@ -17,7 +16,6 @@ STATE=New_action
 # Training seetings
 log_interval=10
 max_episodes=100000
-max_episodes=300
 eval_interval=100
 SAVE_INTERVAL=250
 
