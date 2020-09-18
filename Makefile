@@ -49,6 +49,14 @@ evaluate:
 evaluate-container:
 	xvfb-run ./evaluate_container.sh
 	
+## Rm images
+clean-image: ## remove Docker image
+	sudo $(DOCKER) image rm $(IMAGE_NAME)
+
+## Start Jupyter Notebook server. Inside the container
+jupyter: 
+	sudo docker exec -i $(CONTAINER_NAME) jupyter notebook --ip=0.0.0.0 --port=${JUPYTER_CONTAINER_PORT}
+
 #################################################################################
 # Self Documenting Commands                                                     #
 #################################################################################
