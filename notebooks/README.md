@@ -46,7 +46,7 @@
 </p>
 
 
-### Networkd actions (Proppeler inputs)
+### Agent actions (Proppeler inputs)
 
 
 <p align="center">
