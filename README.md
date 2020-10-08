@@ -1,8 +1,6 @@
 # Using Soft Actor-Critic for Low-Level UAV Control
 
-This repository is the official implementation of [Using Soft Actor-Critic for Low-Level UAV Control](). 
-
-<!-- >📋  Optional: include a graphic explaining your approach/main result, bibtex entry, link to demos, blog posts and tutorials -->
+This repository is the official implementation of [Using Soft Actor-Critic for Low-Level UAV Control](https://arxiv.org/abs/2010.02293). This work will be presented in the IROS 2020 Workshop - "Perception, Learning, and Control for Autonomous Agile Vehicles".
 
 We train a policy using Soft Actor-Critic to control a UAV. This agent is dropped in the air, with a sampled distance and inclination from the target (the green sphere in the [0,0,0] position), and has to get as close as possible to the target. In our experiments the target always has the position = [0,0,0] and angular velocity = [0,0,0].
 
@@ -83,6 +81,7 @@ pip install -r requirements.txt
 ```
 
 4) To install this repo:
+
 ```setup
 python setup.py install
 ```
@@ -153,4 +152,16 @@ The environment is a continuation of the work in:
 [MIT-LICENSE](License.md)
 
 ## Cite us
+
+Barros, Gabriel M.; Colombini, Esther L, "Using Soft Actor-Critic for Low-Level UAV Control", *IROS - workshop Perception, Learning, and Control for Autonomous Agile Vehicles*, 2020.
+
+@misc{barros2020using,
+      title={Using Soft Actor-Critic for Low-Level UAV Control}, 
+      author={Gabriel Moraes Barros and Esther Luna Colombini},
+      year={2020},
+      eprint={2010.02293},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO},
+      journal={IROS - workshop "Perception, Learning, and Control for Autonomous Agile Vehicles"},
+}
 
